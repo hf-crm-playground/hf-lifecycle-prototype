@@ -1,13 +1,26 @@
 import React, { useEffect, useRef } from 'react';
 
 export const COLORS = {
-  treated: '#6655d1',
+  // Chart series (validated categorical order: blue, orange, aqua, yellow)
+  treated: '#2a78d6',
   holdout: '#8a8996',
+  t0: '#2a78d6',
+  t1: '#eb6834',
+  t2: '#1baf7a',
+  t3: '#eda100',
+  fixed: '#8a8996',
   paid: '#eb6834',
   owned: '#1baf7a',
   blue: '#2a78d6',
-  stage: '#7a6cd9',
+  // Holafly brand (from the Holafly In-App Messages tokens)
+  cta: '#c33254',
+  brand: '#d55460',
+  green: '#7ce990',
+  greenDeep: '#1a6b37',
+  ink: '#292b2e',
 };
+
+export const TIER_COLOR = { 0: COLORS.t0, 1: COLORS.t1, 2: COLORS.t2, 3: COLORS.t3, fixed: COLORS.fixed };
 
 const ICONS = {
   summary: 'M4 4h7v7H4zM13 4h7v4h-7zM13 10h7v10h-7zM4 13h7v7H4z',

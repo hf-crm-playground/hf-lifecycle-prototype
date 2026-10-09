@@ -1,34 +1,35 @@
-# GenComm Lifecycle — prototype
+# Holafly Trip NBA — decision console prototype
 
-A clickable prototype of a lifecycle profit engine: for each customer it decides whether to act, how, through which channel and with what incentive, judged by the profit it adds against a random holdout.
+A clickable prototype of the **Holafly NBA System Design** (23 Sep 2026): a trip-state decision layer whose one objective is net contribution per customer — incremental 12-month net revenue plus the paid-acquisition cost avoided when a message wins a click a paid channel would otherwise take. The trip is the unit of decisioning and "no message" is always a candidate.
 
-Everything runs in the browser on **sample data** for a demo store of 8,000 customers. Nothing is sent anywhere; pushes and integrations are simulated, and settings are kept in the viewer's browser.
+Everything runs in the browser on **6,000 sample travellers**. Nothing is sent to Klaviyo; settings, overrides and gap statuses are kept in the viewer's browser.
 
 ## Screens
 
-| Screen | What it shows |
+| Screen | From the design |
 | --- | --- |
-| Executive Summary | Profit added vs holdout, paid cost avoided, wasted discount avoided, lifecycle stages, next-euro split, recommended actions with review-and-push |
-| Customer Explorer | Search and filter customers; each one's value, churn risk, recommended action, the reasons, and the profit each action would add |
-| Lifecycle Optimizer | Monthly budget, holdout size, fatigue pause, paid-ad exclusions; editable action library; engine vs current targeting at every budget |
-| Savings Ledger | Weekly savings (paid re-acquisition, retargeting, discounts) with 90% ranges and guardrails |
-| Next-Euro Planner | Marginal return of retention vs acquisition and the best split of a fixed budget |
-| Drivers | What the churn, value and uplift models rely on most |
-| Integrations | Simulated connectors and the audit log of every push |
+| Overview | Primary metric vs the global holdout, this run's decision points by tier and by "no message" reason, trip-phase mix, guardrails |
+| Traveller explorer | Trip State Builder snapshot (`trip_*` properties), every candidate with its reason code, S(a) breakdown, `nba_last_reason`, the `NBA Decision` event and `nba_*` profile properties, operator overrides (`nba_exclude`, `nba_manual_action`) |
+| Decision policy | The decision table (18 ranked actions + F1, R1, R2), tiers, cap 8 with sub-caps and the Tier 0 reserve, holdout and action controls, capture sub-budget, kill switches, market caps, v1 fixed order vs uplift-table ranking (E8) |
+| Last-click capture | Cap(a) calculator, v1 purchase signals, C1 via `nba_capture_allowed`, how the paid saving is measured |
+| Measurement | Experimental layers, interim reads, per-action uplift with 95% intervals, guardrails, power calculator, the app-LTV question (E4) |
+| Rollout and gaps | Phases 0–3 with exit gates, experiments E1–E11, the 24 data gaps as a tracker, assumptions A1–A6 |
+| Data and Klaviyo | Architecture, trip state machine, `trip_state_builder` thresholds, the 23-event schema, the activation contract, Klaviyo native vs external |
 
-## How the model works (sample)
+## Code
 
-- `src/data.js` generates the customer base (seeded, so numbers are stable).
-- `src/model.js` scores each action per customer: extra orders × order profit, minus send cost, discounts paid on all orders the offer touches, fatigue risk, plus paid-ad cost avoided. The optimizer picks the best action per customer and fits the plan to the budget by profit per euro.
-- "Current targeting" is the usual rule: a 10% offer to at-risk and lapsed customers, most likely buyers first.
+- `src/engine/actions.js` — the decision table as data (triggers, eligibility, suppressions, channels, tiers, sample value models) and reason codes.
+- `src/engine/policy.js` — `decide()`, a port of the policy v1 pseudocode: holdout → global suppressions → cap and reserve → per-action eligibility, confidence, recency, fatigue, capture budget → ranking → channel and sub-caps → action-level control → send window. Also `score()` for S(a), `nbaEvent()` and `nbaProfileProps()`.
+- `src/engine/travellers.js` — sample travellers with builder snapshots; `tripProperties()` mirrors `trip_state_builder/klaviyo.py`.
+- `src/engine/results.js`, `src/engine/content.js` — sample measurement results and the reference tables from the design.
 
-## Run locally
+All values marked as sample are placeholders until the Phase 1 action-level controls report.
+
+## Run and deploy
 
 ```bash
 npm install
 npm run dev
 ```
 
-## Deploy on Vercel
-
-Import the repository in Vercel. It detects Vite automatically: build command `npm run build`, output directory `dist`. No environment variables are needed.
+Vercel detects Vite: build `npm run build`, output `dist`. Pushes to `main` redeploy.

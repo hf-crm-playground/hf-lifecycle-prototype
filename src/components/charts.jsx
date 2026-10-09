@@ -274,3 +274,64 @@ export function Legend({ items }) {
     </div>
   );
 }
+
+// Point + whisker per row around a zero line: an estimate and its 95% interval.
+export function ForestPlot({ rows, format = (v) => v, labelWidth = 210, ariaLabel, unit = '', width = 640 }) {
+  const [hover, setHover] = useState(null);
+  const W = width;
+  const rowH = 30;
+  const padT = 26;
+  const padB = 28;
+  const H = padT + rows.length * rowH + padB;
+  const x0 = labelWidth;
+  const x1 = W - 70;
+  const lo = Math.min(0, ...rows.map((r) => r.low));
+  const hi = Math.max(0, ...rows.map((r) => r.high));
+  const span = hi - lo || 1;
+  const pad = span * 0.06;
+  const X = (v) => x0 + ((v - (lo - pad)) / (span + 2 * pad)) * (x1 - x0);
+  const step = niceStep(span);
+  const ticks = [];
+  for (let t = Math.ceil((lo - pad) / step) * step; t <= hi + pad; t += step) ticks.push(t);
+  return (
+    <div className="chart-wrap">
+      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={ariaLabel} className="chart" onMouseLeave={() => setHover(null)}>
+        {ticks.map((t) => (
+          <g key={t}>
+            <line x1={X(t)} x2={X(t)} y1={padT - 6} y2={H - padB} className={Math.abs(t) < step / 2 ? 'axis' : 'grid'} />
+            <text x={X(t)} y={H - padB + 16} textAnchor="middle" className="tick">
+              {format(t)}
+            </text>
+          </g>
+        ))}
+        <text x={x1 + 8} y={padT - 10} className="tick">{unit}</text>
+        {rows.map((r, i) => {
+          const y = padT + i * rowH + rowH / 2;
+          return (
+            <g key={r.label} onMouseEnter={() => setHover(i)} opacity={hover === null || hover === i ? 1 : 0.5}>
+              <rect x="0" y={y - rowH / 2} width={W} height={rowH} fill="transparent" />
+              <text x={x0 - 12} y={y + 4} textAnchor="end" className="forest-label">
+                {r.label}
+              </text>
+              <line x1={X(r.low)} x2={X(r.high)} y1={y} y2={y} stroke={r.color} strokeWidth="2" strokeLinecap="round" />
+              <line x1={X(r.low)} x2={X(r.low)} y1={y - 5} y2={y + 5} stroke={r.color} strokeWidth="2" />
+              <line x1={X(r.high)} x2={X(r.high)} y1={y - 5} y2={y + 5} stroke={r.color} strokeWidth="2" />
+              <circle cx={X(r.value)} cy={y} r="5" fill={r.color} stroke="#fff" strokeWidth="2" />
+              <text x={x1 + 8} y={y + 4} className="forest-value">
+                {format(r.value)}
+              </text>
+            </g>
+          );
+        })}
+      </svg>
+      {hover !== null && (
+        <div className="tooltip" style={{ left: `${(X(rows[hover].value) / W) * 100}%`, top: padT + hover * rowH + 26, transform: 'translateX(-50%)' }}>
+          <div className="tooltip-title">{rows[hover].label}</div>
+          <div className="tooltip-row"><span /><span>Estimate</span><strong>{format(rows[hover].value)}</strong></div>
+          <div className="tooltip-row"><span /><span>95% interval</span><strong>{format(rows[hover].low)} to {format(rows[hover].high)}</strong></div>
+          {rows[hover].note && <div className="tooltip-row"><span /><span>{rows[hover].note}</span><strong /></div>}
+        </div>
+      )}
+    </div>
+  );
+}

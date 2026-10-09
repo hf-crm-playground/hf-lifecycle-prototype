@@ -1,16 +1,15 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { CUSTOMERS, DEFAULT_ACTIONS, DEFAULT_INTEGRATIONS, DEFAULT_SETTINGS } from './data.js';
-import { aggregate, optimize, responseBaseline } from './model.js';
+import { TRAVELLERS } from './engine/travellers.js';
+import { DEFAULT_POLICY, runDecisions, summarize } from './engine/policy.js';
 import { AppCtx, useHashRoute, usePersisted } from './store.js';
 import { Icon } from './components/ui.jsx';
-import PushDialog from './components/PushDialog.jsx';
-import Summary from './pages/Summary.jsx';
-import Customers from './pages/Customers.jsx';
-import Optimizer from './pages/Optimizer.jsx';
-import Savings from './pages/Savings.jsx';
-import Planner from './pages/Planner.jsx';
-import Drivers from './pages/Drivers.jsx';
-import Integrations from './pages/Integrations.jsx';
+import Overview from './pages/Overview.jsx';
+import Travellers from './pages/Travellers.jsx';
+import Policy from './pages/Policy.jsx';
+import Capture from './pages/Capture.jsx';
+import Measurement from './pages/Measurement.jsx';
+import Rollout from './pages/Rollout.jsx';
+import DataKlaviyo from './pages/DataKlaviyo.jsx';
 
 class PageBoundary extends React.Component {
   constructor(props) {
@@ -37,34 +36,29 @@ class PageBoundary extends React.Component {
 }
 
 const NAV = [
-  { id: 'summary', label: 'Executive Summary', icon: 'summary', page: Summary },
-  { id: 'customers', label: 'Customer Explorer', icon: 'customers', page: Customers },
-  { id: 'optimizer', label: 'Lifecycle Optimizer', icon: 'optimizer', page: Optimizer },
-  { id: 'savings', label: 'Savings Ledger', icon: 'savings', page: Savings },
-  { id: 'planner', label: 'Next-Euro Planner', icon: 'planner', page: Planner },
-  { id: 'drivers', label: 'Drivers', icon: 'drivers', page: Drivers },
-  { id: 'integrations', label: 'Integrations', icon: 'integrations', page: Integrations },
+  { id: 'overview', label: 'Overview', icon: 'summary', page: Overview },
+  { id: 'travellers', label: 'Traveller explorer', icon: 'customers', page: Travellers },
+  { id: 'policy', label: 'Decision policy', icon: 'optimizer', page: Policy },
+  { id: 'capture', label: 'Last-click capture', icon: 'savings', page: Capture },
+  { id: 'measurement', label: 'Measurement', icon: 'planner', page: Measurement },
+  { id: 'rollout', label: 'Rollout and gaps', icon: 'drivers', page: Rollout },
+  { id: 'data', label: 'Data and Klaviyo', icon: 'integrations', page: DataKlaviyo },
 ];
 
 export default function App() {
-  const route = useHashRoute('summary');
-  const [storedActions, setActions] = usePersisted('gc.actions.v1', DEFAULT_ACTIONS);
-  const [storedSettings, setSettings] = usePersisted('gc.settings.v1', DEFAULT_SETTINGS);
-  const [pushLog, setPushLog] = usePersisted('gc.pushlog.v1', []);
-  const [integrations, setIntegrations] = usePersisted('gc.integrations.v1', DEFAULT_INTEGRATIONS);
-  const [push, setPush] = useState(null);
+  const route = useHashRoute('overview');
+  const [storedPolicy, setPolicy] = usePersisted('hf.policy.v1', DEFAULT_POLICY);
+  const [overrides, setOverrides] = usePersisted('hf.overrides.v1', {});
+  const [gapStatus, setGapStatus] = usePersisted('hf.gaps.v1', {});
+  const [phaseNow, setPhaseNow] = usePersisted('hf.phase.v1', 1);
   const [toast, setToast] = useState(null);
 
-  const actions = useMemo(
-    () => DEFAULT_ACTIONS.map((d) => ({ ...d, ...(storedActions.find((a) => a.id === d.id) || {}) })),
-    [storedActions],
+  const policy = useMemo(
+    () => ({ ...DEFAULT_POLICY, ...storedPolicy, subcap: { ...DEFAULT_POLICY.subcap, ...(storedPolicy.subcap || {}) } }),
+    [storedPolicy],
   );
-  const settings = useMemo(() => ({ ...DEFAULT_SETTINGS, ...storedSettings }), [storedSettings]);
-
-  const planRows = useMemo(() => optimize(CUSTOMERS, actions, settings), [actions, settings]);
-  const baseRows = useMemo(() => responseBaseline(CUSTOMERS, actions, settings), [actions, settings]);
-  const plan = useMemo(() => aggregate(planRows), [planRows]);
-  const base = useMemo(() => aggregate(baseRows), [baseRows]);
+  const decisions = useMemo(() => runDecisions(TRAVELLERS, policy, overrides), [policy, overrides]);
+  const summary = useMemo(() => summarize(decisions), [decisions]);
 
   const showToast = useCallback((msg) => {
     setToast(msg);
@@ -73,28 +67,25 @@ export default function App() {
   }, []);
 
   const resetDemo = () => {
-    setActions(DEFAULT_ACTIONS);
-    setSettings(DEFAULT_SETTINGS);
-    setPushLog([]);
-    setIntegrations(DEFAULT_INTEGRATIONS);
-    showToast('Prototype reset to its starting state.');
+    setPolicy(DEFAULT_POLICY);
+    setOverrides({});
+    setGapStatus({});
+    setPhaseNow(1);
+    showToast('Prototype reset to the design defaults.');
   };
 
   const ctx = {
-    customers: CUSTOMERS,
-    actions,
-    setActions,
-    settings,
-    setSettings,
-    planRows,
-    baseRows,
-    plan,
-    base,
-    pushLog,
-    setPushLog,
-    integrations,
-    setIntegrations,
-    openPush: setPush,
+    travellers: TRAVELLERS,
+    policy,
+    setPolicy: (patch) => setPolicy({ ...policy, ...patch }),
+    overrides,
+    setOverrides,
+    decisions,
+    summary,
+    gapStatus,
+    setGapStatus,
+    phaseNow,
+    setPhaseNow,
     showToast,
   };
 
@@ -106,14 +97,17 @@ export default function App() {
       <a href="#main" className="skip">Skip to content</a>
       <div className="app">
         <aside className="sidebar">
-          <a href="#/summary" className="brand" aria-label="GenComm Lifecycle home">
-            <svg width="34" height="22" viewBox="0 0 34 22" aria-hidden="true">
-              <circle cx="11" cy="11" r="8" fill="none" stroke="#8B7FE0" strokeWidth="3" />
-              <circle cx="23" cy="11" r="8" fill="none" stroke="#B9B0F2" strokeWidth="3" />
-            </svg>
+          <a href="#/overview" className="brand" aria-label="Holafly Trip NBA home">
+            <span className="brand-mark" aria-hidden="true">
+              <svg width="30" height="30" viewBox="0 0 30 30">
+                <circle cx="15" cy="15" r="14" fill="#d55460" />
+                <path d="M8 18c3-6 11-6 14 0" fill="none" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" />
+                <circle cx="15" cy="11" r="2.4" fill="#fff" />
+              </svg>
+            </span>
             <span className="brand-text">
-              <span className="brand-name">GENCOMM</span>
-              <span className="brand-sub">lifecycle</span>
+              <span className="brand-name">Trip NBA</span>
+              <span className="brand-sub">Holafly · decision console</span>
             </span>
           </a>
           <nav aria-label="Main" className="nav">
@@ -125,7 +119,9 @@ export default function App() {
             ))}
           </nav>
           <div className="sidebar-foot">
-            <p>Prototype with sample data for a demo store of {CUSTOMERS.length.toLocaleString('en-GB')} customers. Nothing is sent anywhere.</p>
+            <p>
+              Prototype of the Holafly NBA System Design (23 Sep 2026) on {TRAVELLERS.length.toLocaleString('en-GB')} sample travellers. Nothing is sent to Klaviyo.
+            </p>
             <button type="button" className="link-btn" onClick={resetDemo}>
               Reset prototype
             </button>
@@ -137,7 +133,6 @@ export default function App() {
           </PageBoundary>
         </main>
       </div>
-      {push && <PushDialog {...push} onClose={() => setPush(null)} />}
       {toast && (
         <div className="toast" role="status">
           <Icon name="check" />
