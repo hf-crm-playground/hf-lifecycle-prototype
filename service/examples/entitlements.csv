@@ -1,0 +1,4 @@
+customer_id,esim_id,plan_end_at
+cust_04_in_trip,e1,2026-09-28T10:00:00+00:00
+cust_10_new_order_during_trip,e1,2026-09-28T10:00:00+00:00
+cust_13_plan_ended_usage_stopped,e1,2026-09-21T23:59:59.999999+00:00

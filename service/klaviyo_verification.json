@@ -1,0 +1,296 @@
+{
+  "verified_at": "2026-10-10",
+  "method": "Read-only calls through the Klaviyo connector (GET metrics, flows, events with page size 1, profiles with a sparse fieldset). No writes. Values of customer data were not recorded: names, ids, counts and property keys only.",
+  "account": {
+    "id": "H5sgvh",
+    "organization_name": "HOLAFLY LIMITED",
+    "test_account": false
+  },
+  "metrics": {
+    "activation_event": "TyzA4H",
+    "expiration_date_eSIM_v2": "Xmv58M",
+    "entitlement_end_date_event": "VJ8K9D",
+    "hly_always_on_consumption_threshold": "UPuvhM",
+    "hly_always_on_activated": "VGpiWA",
+    "hly_consumption_start": "TLDFtV",
+    "esim_installation_start": "TP3Dek",
+    "esim_installation_complete": "RT8z6X",
+    "hly_order_confirmed": "ScxfD3",
+    "hly_order_created": "WDtkeZ",
+    "Top-up order created": "VwiAKD",
+    "Refunded Order": "PiNeBJ",
+    "Cancelled Order": "PVPhem",
+    "first_open": "QXGFLD",
+    "session_start": "Rxnb8H",
+    "screen_view": "XqvQ9U",
+    "virtual_location_toggle": "WUB972",
+    "safe_browsing_toggle": "R6JwwR",
+    "referral_link_shared": "SbbqCS",
+    "referral_code_copied": "TXBi9m",
+    "Swell Referral Completed": "Xb5T4h",
+    "Viewed Product": "HQTjJT",
+    "Added to Cart": "X4b2Fr",
+    "Checkout Started": "HivxtE",
+    "view_item": "Vw9tQG",
+    "begin_checkout": "Sp8XLw",
+    "Submitted PDP Calendar Lead": "WScBrE",
+    "Submitted Home Calendar Lead": "WE68YJ",
+    "Submitted NPS Score": "WZKynx",
+    "Received Email": "LbGZwB",
+    "Opened Email": "Jph828",
+    "Clicked Email": "PRc2SX",
+    "Bounced Email": "MnbQtc",
+    "Marked Email as Spam": "Jqm84R",
+    "Unsubscribed from Email Marketing": "RwKA5y",
+    "Received Push": "XuL6rm",
+    "Opened Push": "TgTgML",
+    "Bounced Push": "V5XKLk",
+    "Received WhatsApp": "Whh4bY",
+    "Opened WhatsApp": "WZ4TrM",
+    "Clicked WhatsApp": "VZvPh5",
+    "Received Text Message": "V5jaif",
+    "Skipped Send": "WgJWLR"
+  },
+  "missing_metrics": {
+    "NBA Decision": "created by the first NBA Decision event (live mode only)",
+    "Intercom (Created Conversation, Resolved Ticket)": "not in Klaviyo; CARE_OPEN needs an Intercom feed",
+    "Purchase (capital P)": "not present; purchase and Placed Order are",
+    "legacy SMS metric names": "not present; Sent/Received Text Message are"
+  },
+  "other_metrics_seen": {
+    "Placed Order": "JyxCGU",
+    "purchase": "XzHkAR",
+    "hly_plan_created": "RAhLzH",
+    "hly_plan_renewed": "R5suq7",
+    "hly_plan_cancelled": "RekK8v",
+    "Received Silent Push": "W7YTAB",
+    "Sent WhatsApp": "TtKCR3",
+    "Subscribed to WhatsApp Marketing": "Ye2YCi",
+    "Dropped Email": "PaBHXF",
+    "Coupon Used": "TawuaF",
+    "Coupon Assigned": "WJgs5Y",
+    "Merged Profile": "S6TnhB",
+    "Sent Text Message": "Y39SGA",
+    "Unsubscribed from Text Messaging Marketing": "SDSeb9",
+    "hly_push_notification": "Wtq7qv",
+    "hly_receipt_created": "YhYgSW"
+  },
+  "overlapping_flows": [
+    {
+      "id": "TWmsiY",
+      "name": "CRM_TRIPS_POST_TOP_UP_V2",
+      "nba_owner": "I1"
+    },
+    {
+      "id": "RJGDNX",
+      "name": "MAFLY06 - Top up Flow",
+      "nba_owner": "I1"
+    },
+    {
+      "id": "RX3ADw",
+      "name": "CRM_TRIPS_ALWAYS_ON_ENDING_TOP_UP_PUSH",
+      "nba_owner": "I3"
+    },
+    {
+      "id": "UTREx6",
+      "name": "CRM_TRIPS_POST_UPSELLING_V3",
+      "nba_owner": "T2"
+    },
+    {
+      "id": "SEhSMh",
+      "name": "CRM_TRIPS_POST_WINBACK_ACTIVE_BUYERS_V3",
+      "nba_owner": "T2"
+    },
+    {
+      "id": "T2SZRT",
+      "name": "CRM_TRIPS_POST_WINBACK_ACTIVE_BUYERS_V2",
+      "nba_owner": "T2"
+    },
+    {
+      "id": "ReC6vj",
+      "name": "CRM_TRIPS_REACT_WINBACK_AT_RISK_CUSTOMERS",
+      "nba_owner": "B2"
+    },
+    {
+      "id": "XrinQr",
+      "name": "CRM_TRIPS_REACT_WINBACK_DORMANT_CUSTOMERS",
+      "nba_owner": "B2"
+    },
+    {
+      "id": "YtYkP2",
+      "name": "CRM_TRIPS_REACT_WINBACK_SUPER_DORMANT_CUSTOMERS",
+      "nba_owner": "B2"
+    },
+    {
+      "id": "SegAKS",
+      "name": "CRM_TRIPS_REACT_AT_RISK_SEGMENT_GAMIFY_10OFF",
+      "nba_owner": "review"
+    },
+    {
+      "id": "UPDqwa",
+      "name": "CRM_TRIPS_REACT_D1_PRE_TRAVEL_REMINDER (date-based)",
+      "nba_owner": "P1"
+    },
+    {
+      "id": "ULbTxg",
+      "name": "CRM_TRIPS_POST_LOYALTY_PLATINUM",
+      "nba_owner": "review"
+    },
+    {
+      "id": "VQBu4P",
+      "name": "CRM_TRIPS_POST_LOYALTY_GOLD",
+      "nba_owner": "review"
+    },
+    {
+      "id": "WDWMtu",
+      "name": "CRM_TRIPS_POST_LOYALTY_SILVER",
+      "nba_owner": "review"
+    },
+    {
+      "id": "RamEKB",
+      "name": "CRM_PLANS_POST_ONBOARDING",
+      "nba_owner": "review"
+    }
+  ],
+  "capture_flows": [
+    {
+      "id": "SMEfpK",
+      "name": "CRM_TRIPS_PRE_ABANDONED_CART_V3"
+    },
+    {
+      "id": "Y3MGDJ",
+      "name": "CRM_TRIPS_PRE_ABANDONED_CART_ES"
+    },
+    {
+      "id": "X8RSQq",
+      "name": "CRM_TRIPS_PRE_ABANDONED_CART_EN"
+    },
+    {
+      "id": "YqWmDE",
+      "name": "CRM_TRIPS_PRE_ABANDONED_CART_FR"
+    },
+    {
+      "id": "RxgHLm",
+      "name": "CRM_TRIPS_PRE_ABANDONED_CART_DE"
+    },
+    {
+      "id": "Xpnhkr",
+      "name": "CRM_TRIPS_PRE_ABANDONED_CART_PT"
+    },
+    {
+      "id": "TvFpJJ",
+      "name": "CRM_TRIPS_PRE_ABANDONED_CART_APP_BEGIN_CHECKOUT_V2"
+    },
+    {
+      "id": "YkTUXw",
+      "name": "CRM_TRIPS_PRE_APP_VIEW_ITEM_RECOVERY_V2"
+    },
+    {
+      "id": "TUTQFa",
+      "name": "CRM_TRIPS_PRE_ABANDONED_ORDER_CREATED_V1"
+    },
+    {
+      "id": "QeUyvL",
+      "name": "PRO - Abandoned Cart"
+    }
+  ],
+  "transactional_flows": [
+    {
+      "id": "RDaeGW",
+      "name": "Service - Event Dispatcher - Push Notifications"
+    }
+  ],
+  "payload_keys": {
+    "activation_event": [
+      "$event_id",
+      "activation_country",
+      "activation_country_localized",
+      "activation_number",
+      "date",
+      "days_between_purchase_and_activation",
+      "number_of_days_purchased",
+      "order_id",
+      "purchased_destination",
+      "total_value"
+    ],
+    "expiration_date_eSIM_v2": [
+      "$event_id",
+      "Activation_date_eSIM",
+      "Days",
+      "Price",
+      "Quantity_elSM",
+      "expiration_date_eSIM_v2",
+      "iccid_eSIM",
+      "order_id",
+      "provider",
+      "variant_eSIM",
+      "variant_id"
+    ],
+    "hly_consumption_start": [
+      "$event_id",
+      "days",
+      "expiration_date",
+      "timestamp",
+      "variant_esim"
+    ],
+    "hly_always_on_consumption_threshold": [
+      "$event_id",
+      "parent_sku",
+      "percentage"
+    ],
+    "entitlement_end_date_event": [
+      "$event_id",
+      "activation_country",
+      "activation_country_localized",
+      "activation_number",
+      "order_id",
+      "purchased_destination",
+      "total_usage_per_day",
+      "total_usage_per_trip",
+      "total_value"
+    ],
+    "hly_order_confirmed (non-PII keys used)": [
+      "customer_locale",
+      "customer_currency",
+      "order_number",
+      "items",
+      "destination_localized",
+      "financial_status",
+      "buyer_accepts_marketing",
+      "total_discounts",
+      "discount_code",
+      "customer_type",
+      "$value"
+    ],
+    "Received Push": [
+      "$content_locale",
+      "$flow",
+      "$message",
+      "App ID",
+      "Message Name",
+      "Message Type",
+      "Push Platform",
+      "timestamp"
+    ]
+  },
+  "profile_sample": {
+    "profiles": 50,
+    "with_external_id": 8,
+    "with_timezone": 26,
+    "with_locale": 40,
+    "external_id_formats": [
+      "10-digit numeric",
+      "UUID"
+    ]
+  },
+  "findings": [
+    "eSIMs are keyed by order_id: activation_event has no esim_id. expiration_date_eSIM_v2 carries order_id, plan end date and ICCID, so plan_end_at per order is available from Klaviyo.",
+    "Join key between hly_order_confirmed (order_number) and activation_event / expiration_date_eSIM_v2 (order_id, UUID) is unverified; until confirmed, pre-trip orders without an activation may not join.",
+    "Country names are English names (activation_country) and SKU slugs (parent_sku 'esim-<country>'); nba/countries.py maps them to ISO-2.",
+    "Only 8 of 50 recently updated profiles have external_id, in two formats; the service addresses profiles by Klaviyo profile id.",
+    "hly_always_on_consumption_threshold.percentage is a string.",
+    "hly_order_confirmed carries name, phone, email, billing and shipping address: the ingest reads only order_number, items and destination_localized, and verification never samples it. Flag to the data/privacy owner.",
+    "No Intercom metrics in Klaviyo: CARE_OPEN and care_this_trip must come from Intercom or the warehouse.",
+    "Daily usage is not in Klaviyo (gap 2): usage_daily comes from the warehouse."
+  ]
+}

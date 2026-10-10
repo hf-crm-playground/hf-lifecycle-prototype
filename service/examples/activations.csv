@@ -1,0 +1,17 @@
+customer_id,esim_id,activated_at,first_network_country
+cust_03_test_install,e1,2026-09-18T08:00:00+00:00,ES
+cust_04_in_trip,e1,2026-09-15T08:00:00+00:00,JP
+cust_05_test_then_real_trip,e1,2026-09-01T08:00:00+00:00,ES
+cust_06_provisional_end,e1,2026-09-01T08:00:00+00:00,JP
+cust_07_reopened,e1,2026-09-01T08:00:00+00:00,JP
+cust_08_post_trip,e1,2026-08-20T08:00:00+00:00,JP
+cust_09_between_trips,e1,2026-07-01T08:00:00+00:00,JP
+cust_10_new_order_during_trip,e1,2026-09-15T08:00:00+00:00,JP
+cust_11_multi_esim_one_trip,e1,2026-09-10T08:00:00+00:00,JP
+cust_11_multi_esim_one_trip,e2,2026-09-15T08:00:00+00:00,KR
+cust_12_refunded,e1,2026-09-15T08:00:00+00:00,JP
+cust_13_plan_ended_usage_stopped,e1,2026-09-15T08:00:00+00:00,JP
+cust_14_long_trip,e1,2026-08-10T08:00:00+00:00,JP
+cust_15_unknown_country_big,e1,2026-09-15T08:00:00+00:00,
+cust_16_two_trips,e1,2026-06-01T08:00:00+00:00,US
+cust_16_two_trips,e2,2026-09-15T08:00:00+00:00,JP

@@ -1,0 +1,17 @@
+customer_id,home_country,declared_travel_start,declared_destination
+cust_01_pre_trip,ES,,
+cust_02_departure_likely,ES,2026-09-22,JP
+cust_03_test_install,ES,,
+cust_04_in_trip,ES,,
+cust_05_test_then_real_trip,ES,,
+cust_06_provisional_end,ES,,
+cust_07_reopened,ES,,
+cust_08_post_trip,ES,,
+cust_09_between_trips,ES,,
+cust_10_new_order_during_trip,ES,,
+cust_11_multi_esim_one_trip,ES,,
+cust_12_refunded,ES,,
+cust_13_plan_ended_usage_stopped,ES,,
+cust_14_long_trip,ES,,
+cust_15_unknown_country_big,ES,,
+cust_16_two_trips,ES,,

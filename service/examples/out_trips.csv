@@ -1,0 +1,14 @@
+trip_id,customer_id,started_at,start_source,first_usage_day,last_usage_day,provisional_end_day,confirmed,esim_ids,destinations,usage_days,mb_used_total,outside_home_country
+cust_04_in_trip:2026-09-15,cust_04_in_trip,2026-09-15T08:00:00+00:00,activation,2026-09-15,2026-09-22,2026-10-06,False,e1,JP,8,2400.0,True
+cust_05_test_then_real_trip:2026-09-15,cust_05_test_then_real_trip,2026-09-15T00:00:00+00:00,usage,2026-09-15,2026-09-22,2026-10-06,False,e1,JP,8,2400.0,True
+cust_06_provisional_end:2026-09-01,cust_06_provisional_end,2026-09-01T08:00:00+00:00,activation,2026-09-01,2026-09-08,2026-09-22,False,e1,JP,8,2400.0,True
+cust_07_reopened:2026-09-01,cust_07_reopened,2026-09-01T08:00:00+00:00,activation,2026-09-01,2026-09-22,2026-10-06,False,e1,JP,9,2700.0,True
+cust_08_post_trip:2026-08-20,cust_08_post_trip,2026-08-20T08:00:00+00:00,activation,2026-08-20,2026-08-28,2026-09-11,True,e1,JP,9,2700.0,True
+cust_09_between_trips:2026-07-01,cust_09_between_trips,2026-07-01T08:00:00+00:00,activation,2026-07-01,2026-07-10,2026-07-24,True,e1,JP,10,3000.0,True
+cust_10_new_order_during_trip:2026-09-15,cust_10_new_order_during_trip,2026-09-15T08:00:00+00:00,activation,2026-09-15,2026-09-22,2026-10-06,False,e1,JP,8,2400.0,True
+cust_11_multi_esim_one_trip:2026-09-10,cust_11_multi_esim_one_trip,2026-09-10T08:00:00+00:00,activation,2026-09-10,2026-09-22,2026-10-06,False,e1|e2,JP|KR,13,3900.0,True
+cust_13_plan_ended_usage_stopped:2026-09-15,cust_13_plan_ended_usage_stopped,2026-09-15T08:00:00+00:00,activation,2026-09-15,2026-09-21,2026-10-05,False,e1,JP,7,2100.0,True
+cust_14_long_trip:2026-08-10,cust_14_long_trip,2026-08-10T08:00:00+00:00,activation,2026-08-10,2026-09-22,2026-10-06,False,e1,JP,44,13200.0,True
+cust_15_unknown_country_big:2026-09-15,cust_15_unknown_country_big,2026-09-15T08:00:00+00:00,activation,2026-09-15,2026-09-22,2026-10-06,False,e1,JP,8,960.0,
+cust_16_two_trips:2026-06-01,cust_16_two_trips,2026-06-01T08:00:00+00:00,activation,2026-06-01,2026-06-05,2026-06-19,True,e1,US,5,1500.0,True
+cust_16_two_trips:2026-09-15,cust_16_two_trips,2026-09-15T08:00:00+00:00,activation,2026-09-15,2026-09-22,2026-10-06,False,e2,JP,8,2400.0,True

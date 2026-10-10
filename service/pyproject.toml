@@ -1,0 +1,19 @@
+[project]
+name = "holafly-nba"
+version = "0.1.0"
+description = "Holafly Trip Decision Service (NBA policy v1) and Trip State Builder"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.optional-dependencies]
+tz = ["tzdata"]
+
+[project.scripts]
+nba = "nba.cli:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]

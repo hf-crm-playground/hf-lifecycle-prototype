@@ -25,6 +25,10 @@ Everything runs in the browser on **6,000 sample travellers**. Nothing is sent t
 
 All values marked as sample are placeholders until the Phase 1 action-level controls report.
 
+## Decision Service (`service/`)
+
+The Python service behind the console: the Trip State Builder, policy v1 as code, the decision log, and the Klaviyo connection (dry-run writes, live read checks). See [service/README.md](service/README.md).
+
 ## Run and deploy
 
 ```bash

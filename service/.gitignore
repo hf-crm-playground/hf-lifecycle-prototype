@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+*.db
+outbox/
+decisions.csv
+verification.json
