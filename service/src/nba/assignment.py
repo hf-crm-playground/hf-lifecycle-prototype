@@ -36,10 +36,15 @@ def in_action_control(customer_id: str, action_id: str, trip_id: Optional[str], 
     return stable_hash(f"{customer_id}|{action_id}|{trip_id or 'none'}") < share
 
 
-def decision_id(customer_id: str, decided_at: datetime) -> str:
+def decision_id(customer_id: str, decided_at: datetime, source: str = "") -> str:
     """One decision per customer per hourly run; re-running the hour gives the
-    same id, which is also the Klaviyo event unique_id (idempotent writes)."""
-    hour = decided_at.strftime("%Y%m%dT%H")
-    a = int(stable_hash(f"{customer_id}|{hour}") * 4294967296)
-    b = int(stable_hash(f"{hour}|{customer_id}|nba") * 4294967296)
-    return f"dec_{hour}_{a:08x}{b:08x}"
+    same id, which is also the Klaviyo event unique_id (idempotent writes).
+    Real-time triggers and held-decision releases (`source` set) are keyed by
+    the minute and the source, so they never collide with the hourly row."""
+    if source:
+        stamp = decided_at.strftime("%Y%m%dT%H%M") + source
+    else:
+        stamp = decided_at.strftime("%Y%m%dT%H")
+    a = int(stable_hash(f"{customer_id}|{stamp}") * 4294967296)
+    b = int(stable_hash(f"{stamp}|{customer_id}|nba") * 4294967296)
+    return f"dec_{stamp}_{a:08x}{b:08x}"

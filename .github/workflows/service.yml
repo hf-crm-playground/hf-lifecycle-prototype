@@ -1,0 +1,33 @@
+name: service
+
+on:
+  push:
+    paths: ["service/**", ".github/workflows/service.yml"]
+  pull_request:
+    paths: ["service/**"]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ["3.10", "3.12"]
+    defaults:
+      run:
+        working-directory: service
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: python -m unittest discover -s tests/trip_state
+      - run: python -m unittest discover -s tests/nba
+      - name: Offline smoke run on the examples
+        run: |
+          PYTHONPATH=src python -m nba run --customers examples/customers.csv --orders examples/orders.csv \
+            --activations examples/activations.csv --usage examples/usage_daily.csv \
+            --entitlements examples/entitlements.csv --signals examples/signals.csv \
+            --as-of 2026-09-23T10:00:00Z --mode offline --db /tmp/nba.db --outbox /tmp/outbox.jsonl

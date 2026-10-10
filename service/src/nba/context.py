@@ -82,6 +82,8 @@ class CustomerSignals:
     p0_buy: float = 0.0  # proxy purchase probability (capture)
     coupon_user: bool = False
 
+    predicted_clv: Optional[float] = None  # Klaviyo predictive analytics
+    churn_probability: Optional[float] = None
     nps_score: Optional[int] = None
     days_since_nps: Optional[int] = None
     anniversary_window: bool = False
@@ -142,6 +144,7 @@ class DecisionContext:
 
     s: CustomerSignals
     h: ContactHistory
+    trips_completed: int = 0
 
     @property
     def tz_known(self) -> bool:
@@ -232,4 +235,5 @@ def build_context(
         network_outside_plan=False,  # v2: needs a network-country event (gap 16)
         s=signals,
         h=history,
+        trips_completed=snap.trips_completed,
     )

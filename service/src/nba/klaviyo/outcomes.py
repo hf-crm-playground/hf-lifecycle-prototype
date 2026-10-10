@@ -18,6 +18,9 @@ from .client import KlaviyoClient
 from .registry import MESSAGE_METRICS, TRANSACTIONAL_FLOW_IDS
 
 
+LATE_OVERLAP = timedelta(hours=48)
+
+
 def _iso_z(dt: datetime) -> str:
     return dt.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
@@ -88,7 +91,9 @@ def pull_message_events(
     for name, (metric_id, kind, channel) in (metrics or MESSAGE_METRICS).items():
         key = f"events:{metric_id}"
         cursor = store.get_cursor(key)
-        since = datetime.fromisoformat(cursor) if cursor else now - lookback
+        # Re-read an overlap behind the cursor: late-ingested events (buffered
+        # app events, delayed webhooks) still land; event ids dedupe.
+        since = min(datetime.fromisoformat(cursor), now - LATE_OVERLAP) if cursor else now - lookback
         rows: List[Dict[str, Any]] = []
         last = since
         for rec, included in client.iter_records("/api/events", events_params(metric_id, since, now, page_size), max_pages):

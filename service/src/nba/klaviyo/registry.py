@@ -112,8 +112,14 @@ CAPTURE_FLOWS: Dict[str, str] = {
     "QeUyvL": "PRO - Abandoned Cart",
 }
 
+COMMERCE_METRICS: Dict[str, str] = {
+    "Coupon Used": "TawuaF",
+    "Placed Order": "JyxCGU",
+}
+
 REQUIRED_METRICS = {**TRIP_METRICS, **{k: v[0] for k, v in MESSAGE_METRICS.items()}}
-ALL_METRICS = {**TRIP_METRICS, **APP_METRICS, **INTENT_METRICS, **{k: v[0] for k, v in MESSAGE_METRICS.items()}}
+ALL_METRICS = {**TRIP_METRICS, **APP_METRICS, **INTENT_METRICS, **COMMERCE_METRICS,
+               **{k: v[0] for k, v in MESSAGE_METRICS.items()}}
 
 # Known gaps found in verification (not errors: the service degrades).
 KNOWN_MISSING = {

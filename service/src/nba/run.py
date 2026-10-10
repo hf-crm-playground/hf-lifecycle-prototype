@@ -24,6 +24,7 @@ from .actions import ACTIONS, NOT_AT_POINT, Value
 from .config import DEFAULT_POLICY, PolicyConfig
 from .context import CustomerSignals, DecisionContext, build_context
 from .klaviyo.client import KlaviyoClient
+from .learner import Model
 from .klaviyo.payloads import bulk_import_bodies, nba_decision_event, nba_profile_properties
 from .policy import Decision, decide
 from .store import Store
@@ -47,6 +48,8 @@ class RunResult:
     superseded: int = 0
     expired: int = 0
     events_written: int = 0
+    learner_decisions: int = 0
+    explored: int = 0
     profile_jobs: int = 0
     profiles_synced: int = 0
     by_outcome: Counter = field(default_factory=Counter)
@@ -95,10 +98,19 @@ def run_hour(
     uplift: Optional[Dict[str, Value]] = None,
     only: Optional[Set[str]] = None,
     sync_trip_properties: bool = True,
+    model: Optional[Model] = None,
+    save_snapshots: bool = True,
+    id_source: str = "",
 ) -> RunResult:
     now = now.astimezone(timezone.utc)
     res = RunResult(as_of=now)
     profiles: Dict[str, Dict[str, object]] = {}
+    # Guardrail and operator pauses recorded in the store act as kill switches.
+    paused = set(store.killed_actions())
+    if paused:
+        policy = replace(policy, killed=frozenset(policy.killed | paused))
+    if save_snapshots and only is None:
+        store.save_snapshots(snapshots, declared, signals)
     pids: Dict[str, Optional[str]] = {}
 
     for cid, snap in snapshots.items():
@@ -131,17 +143,9 @@ def run_hour(
         if not points and held is None and not sig.nba_manual_action:
             continue
         res.at_decision_point += 1
-        d = decide(ctx, policy, uplift)
+        d = decide(ctx, policy, uplift, model, id_source=id_source or ("rel" if held is not None else ""))
 
-        if held is not None:
-            same = d.outcome == "send" and d.action == held["chosen_action"] and d.channel == held["channel"]
-            if same and not d.held:
-                store.set_status(held["decision_id"], "released", now, released_by=d.decision_id)
-                res.released += 1
-            else:
-                store.set_status(held["decision_id"], "superseded", now, released_by=d.decision_id)
-                res.superseded += 1
-        else:
+        if held is None:
             last = store.last_decision(cid)
             if (d.outcome == "none" and last is not None and last["outcome"] == "none"
                     and now - datetime.fromisoformat(last["decided_at"]) < RELOG_AFTER
@@ -153,9 +157,20 @@ def run_hour(
         if not store.log(d, status, now):
             res.duplicate_hour += 1
             continue
+        if held is not None:  # only after the new row exists
+            same = d.outcome == "send" and d.action == held["chosen_action"] and d.channel == held["channel"]
+            if same and not d.held:
+                store.set_status(held["decision_id"], "released", now, released_by=d.decision_id)
+                res.released += 1
+            else:
+                store.set_status(held["decision_id"], "superseded", now, released_by=d.decision_id)
+                res.superseded += 1
         res.logged += 1
         res.decisions.append(d)
         res.by_outcome[d.outcome] += 1
+        if d.policy_mode == "learner":
+            res.learner_decisions += 1
+            res.explored += int(d.explored)
         if d.outcome == "send":
             res.by_action[d.action] += 1
             res.by_channel[d.channel] += 1
@@ -184,4 +199,5 @@ def release_held(now: datetime, snapshots: Dict[str, TripSnapshot], signals: Dic
                  store: Store, client: KlaviyoClient, policy: PolicyConfig = DEFAULT_POLICY, **kw) -> RunResult:
     """Re-validate only the customers whose held decision's window has opened."""
     due = {r["customer_id"] for r in store.held_due(now)}
-    return run_hour(now, snapshots, signals, store, client, policy, only=due, sync_trip_properties=False, **kw)
+    return run_hour(now, snapshots, signals, store, client, policy, only=due, sync_trip_properties=False,
+                    save_snapshots=False, id_source="rel", **kw)

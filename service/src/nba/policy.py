@@ -25,6 +25,8 @@ from .assignment import decision_id, in_action_control, in_global_holdout
 from .config import DEFAULT_POLICY, PolicyConfig
 from .context import DecisionContext
 from .explain import sentence_for
+from .features import FEATURE_VERSION, cell, feature_vector
+from .learner import Model, Option
 from .scoring import Score, score
 from .windows import next_send_time
 
@@ -91,6 +93,16 @@ class Decision:
     flags: Dict[str, Any] = field(default_factory=dict)
     sentence: str = ""
     features: Dict[str, Any] = field(default_factory=dict)
+    # Learning: how the choice was made, so it can be evaluated off-policy.
+    policy_mode: str = "rules"
+    model_version: Optional[str] = None
+    propensity: Optional[float] = None
+    control_share: float = 0.0
+    explored: bool = False
+    options: Optional[List[Dict[str, Any]]] = None
+    cell: Optional[str] = None
+    feature_version: Optional[str] = None
+    feature_vector: Optional[Dict[str, Any]] = None
 
     @property
     def action_obj(self) -> Optional[Action]:
@@ -185,16 +197,29 @@ def _conf_ok(have: str, need: str) -> bool:
 # ------------------------------------------------------------- decide
 
 
+def deliverable_channels(c: DecisionContext, a: Action, p: PolicyConfig) -> List[str]:
+    out = []
+    for ch in a.channels:
+        sub = p.subcap_for(ch)
+        if can_receive(c, ch, p) and (sub is None or c.h.sends_30d.get(ch, 0) < sub):
+            out.append(ch)
+    return out
+
+
 def decide(
     c: DecisionContext,
     p: PolicyConfig = DEFAULT_POLICY,
     uplift: Optional[Dict[str, Value]] = None,
+    model: Optional["Model"] = None,
+    id_source: str = "",
 ) -> Decision:
+    """`model` is used only when p.ranking == "learner"; otherwise the fixed
+    rank (v1) or the uplift table decides."""
     cap = p.cap_for(c.market)
     used = c.h.sends_30d.get("total", 0)
     budget = cap - used
     d = Decision(
-        decision_id=decision_id(c.customer_id, c.decided_at),
+        decision_id=decision_id(c.customer_id, c.decided_at, id_source),
         customer_id=c.customer_id,
         trip_id=c.trip_id,
         decided_at=c.decided_at,
@@ -210,6 +235,9 @@ def decide(
         cap_state={"used": used, "cap": cap, "left": max(0, budget), **{k: v for k, v in c.h.sends_30d.items() if k != "total"}},
         policy_version=p.policy_version,
         features=c.to_features(),
+        feature_version=FEATURE_VERSION,
+        feature_vector=feature_vector(c),
+        cell=cell(c),
     )
 
     def none(reason: str, **kw) -> Decision:
@@ -313,7 +341,24 @@ def decide(
     if not eligible:
         return none("NO_ELIGIBLE_ACTION")
 
-    if p.ranking == "uplift":
+    choice = None
+    if p.ranking == "learner" and model is not None:
+        top = min(ACTION_BY_ID[r.id].tier for r in eligible)
+        opts = [
+            Option(r.id, ch, 0.0 if ch in ("in_app", "native_flow") else p.lambda_send)
+            for r in eligible if ACTION_BY_ID[r.id].tier == top
+            for ch in deliverable_channels(c, ACTION_BY_ID[r.id], p)
+        ]
+        if opts:
+            choice = model.choose(opts, d.cell or "*", seed=d.decision_id)
+            ranked = [next(r for r in eligible if r.id == choice.option.action)]
+            ranked[0].channel = choice.option.channel
+            ranked += [r for r in eligible if r is not ranked[0]]
+            d.policy_mode, d.model_version = "learner", model.version
+            d.propensity, d.options, d.explored = choice.propensity, choice.table, choice.explored
+        else:
+            ranked = sorted(eligible, key=lambda r: (ACTION_BY_ID[r.id].tier, ACTION_BY_ID[r.id].rank))
+    elif p.ranking == "uplift":
         ranked = [r for r in eligible if r.score and r.score.total > 0]
         ranked.sort(key=lambda r: (ACTION_BY_ID[r.id].tier, -r.score.total))
         for r in eligible:
@@ -329,12 +374,24 @@ def decide(
         r.status, r.why = "rejected", "OUTRANKED"
     best.status = "chosen"
     a = ACTION_BY_ID[best.id]
+    if choice is None:
+        # Deterministic logging policy: the chosen option had probability 1.
+        d.propensity = 1.0
+        d.options = [{"action": best.id, "channel": best.channel, "propensity": 1.0}] if best.channel else None
+    if best.channel and choice is not None:
+        best.score = score(c, a, best.channel, p, uplift)
 
     if not best.channel:
         return none("NO_DELIVERABLE_CHANNEL", chosen_candidate=best.id)
 
-    if a.under_test and in_action_control(c.customer_id, a.id, c.trip_id, p.action_control):
-        return none("ACTION_CONTROL", arm="action_control", chosen_candidate=best.id)
+    if a.under_test:
+        d.control_share = p.action_control
+        if in_action_control(c.customer_id, a.id, c.trip_id, p.action_control):
+            # The control's outcome window starts when the message would have
+            # gone out, so treated and control windows line up.
+            st = next_send_time(c.decided_at, c.local_tz, p.window_for(best.channel, a.tier))
+            return none("ACTION_CONTROL", arm="action_control", chosen_candidate=best.id, channel=best.channel,
+                        send_at=st.send_at)
 
     capture_only = a.capture_action or bool(best.score and best.score.cap > best.score.d_r)
     return send(a, best.channel, "CAPTURE_ONLY" if capture_only else None)

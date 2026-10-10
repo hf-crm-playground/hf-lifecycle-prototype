@@ -34,7 +34,16 @@ CREATE TABLE IF NOT EXISTS `holafly_nba.decision_log` (
   sentence               STRING NOT NULL,
   flags                  JSON,
   features               JSON NOT NULL,     -- context frozen at decided_at (no PII)
-  dispatch_mode          STRING
+  dispatch_mode          STRING,
+  policy_mode            STRING,            -- rules | learner
+  model_version          STRING,
+  propensity             FLOAT64,           -- P(chosen action and channel) under the logging policy
+  control_share          FLOAT64,
+  explored               BOOL,
+  options                JSON,              -- option set with propensities (for off-policy evaluation)
+  cell                   STRING,
+  feature_version        STRING,
+  feature_vector         JSON
 )
 PARTITION BY DATE(decided_at)
 CLUSTER BY customer_id, chosen_action;
@@ -73,3 +82,47 @@ WHERE NOT override
 QUALIFY ROW_NUMBER() OVER (
   PARTITION BY customer_id, COALESCE(chosen_action, chosen_candidate), COALESCE(trip_id, 'none')
   ORDER BY decided_at) = 1;
+
+-- Learning tables (mirrors of the SQLite store).
+CREATE TABLE IF NOT EXISTS `holafly_nba.rewards` (
+  decision_id   STRING NOT NULL,
+  customer_id   STRING NOT NULL,
+  action        STRING NOT NULL,
+  channel       STRING,
+  arm           STRING NOT NULL,   -- treated | control
+  cell          STRING,
+  propensity    FLOAT64,
+  model_version STRING,
+  decided_at    TIMESTAMP NOT NULL,
+  converted     BOOL NOT NULL,
+  revenue       FLOAT64 NOT NULL,
+  unsubscribed  BOOL NOT NULL,
+  spam          BOOL NOT NULL,
+  reward        FLOAT64 NOT NULL,
+  computed_at   TIMESTAMP NOT NULL
+)
+PARTITION BY DATE(decided_at)
+CLUSTER BY action, arm;
+
+CREATE TABLE IF NOT EXISTS `holafly_nba.models` (
+  version    STRING NOT NULL,
+  trained_at TIMESTAMP NOT NULL,
+  n_rows     INT64 NOT NULL,
+  params     JSON NOT NULL,
+  metrics    JSON,
+  active     BOOL NOT NULL
+);
+
+-- Learner health: exploration share, mean propensity and reward by model version and week.
+CREATE OR REPLACE VIEW `holafly_nba.learner_health` AS
+SELECT
+  d.model_version,
+  DATE_TRUNC(DATE(d.decided_at), WEEK) AS week,
+  COUNT(*) AS decisions,
+  AVG(IF(d.explored, 1, 0)) AS explored_share,
+  AVG(d.propensity) AS mean_propensity,
+  AVG(r.reward) AS mean_reward
+FROM `holafly_nba.decision_log` d
+LEFT JOIN `holafly_nba.rewards` r USING (decision_id)
+WHERE d.policy_mode = 'learner'
+GROUP BY 1, 2;
